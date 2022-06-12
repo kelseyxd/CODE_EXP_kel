@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, TextInput, Button } from "react-native";
+import { StyleSheet, Text, View, TextInput, Button, Alert } from "react-native";
 import CalendarPicker from "react-native-calendar-picker";
 import * as Calendar from "expo-calendar";
 
@@ -36,22 +36,6 @@ async function createCalendar() {
   return newCalendarID;
 }
 
-//Method that saves a new event to the calendar.
-const addNewEvent = async () => {
-  try {
-    const calendarId = await createCalendar();
-
-    const res = await Calendar.createEventAsync(calendarId, {
-      endDate: getAppointementDate(startDate),
-      startDate: getAppointementDate(startDate),
-      title: "Happy Birthday buddy " + friendNameText,
-    });
-    Alert.alert("Event Created!");
-  } catch (e) {
-    console.log(e);
-  }
-};
-
 export default function App() {
   //record the date value our users select with the calendar picker
   const [selectedStartDate, setSelectedStartDate] = useState(null);
@@ -59,7 +43,24 @@ export default function App() {
     ? selectedStartDate.format("YYYY-MM-DD").toString()
     : ""; //If the user has not made a selection, it will return an empty string.
   //allow users to enter the name of a friend. Subsequently, the name will be added to the event title.
-  const [friendNameText, setFriendNameText] = useState("");
+  const [event, setEvent] = useState("");
+
+  //Method that saves a new event to the calendar.
+  const addNewEvent = async () => {
+    try {
+      const calendarId = await createCalendar();
+
+      const res = await Calendar.createEventAsync(calendarId, {
+        endDate: getAppointementDate(startDate),
+        startDate: getAppointementDate(startDate),
+        title: "Happy Birthday buddy " + friendNameText,
+      });
+      console.log("add event");
+      Alert.alert("Event Created!");
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   //checks if your app has the required permissions to access the user’s calendar, and requests permission if it does not have it already.
   useEffect(() => {
@@ -79,13 +80,13 @@ export default function App() {
     <View style={styles.container}>
       <StatusBar style="auto" />
       <TextInput
-        onChangeText={setFriendNameText}
-        value={friendNameText}
-        placeholder="Enter the name of your friend"
+        onChangeText={setEvent}
+        value={event}
+        placeholder="Enter the event title"
         style={styles.input}
       />
       <CalendarPicker onDateChange={setSelectedStartDate} />
-      <Text style={styles.dateText}>Birthday: {startDate}</Text>
+      <Text style={styles.dateText}>Date: {startDate}</Text>
       <Button title={"Add to calendar"} onPress={addNewEvent} />
     </View>
   );
